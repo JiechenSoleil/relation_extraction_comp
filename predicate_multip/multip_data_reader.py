@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @File  : data.py
+# @File  : multip_data_reader.py
 # @Author: Betafringe
 # @Date  : 2019-03-29
 # @Desc  : 
