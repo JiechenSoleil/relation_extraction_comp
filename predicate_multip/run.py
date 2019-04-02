@@ -1,15 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @File  : train.py
+# @File  : run.py
 # @Author: Betafringe
 # @Date  : 2019-03-29
 # @Desc  : 
 # @Contact : betafringe@foxmail.com
+import sys
+sys.path.append('../')
+sys.path.append('../../')
+
 import argparse
 import sys
 from datetime import time
 
+import torch
+import torch.optim as optim
+import torch.nn.functional as F
 
+from multip_data_reader import *
+from tools import *
 
 
 def main(args):
@@ -19,12 +28,57 @@ def main(args):
 
 
 def init(args):
+    wordemb_dicts = data_generator.get_dict('wordemb_dict')
+    label_dicts = data_generator.get_dict('label_dict')
+    dicts = wordemb_dicts, label_dicts
+    model = tools.pick_model(args, dicts)
+    print(model)
 
+    if not args.test_model:
+        optimizer = optim.Adam(model.parameters(), weight_decay=args.weight_decay, lr=args.lr)
+    else:
+        optimizer = None
+    params = tools.make_param_dict(args)
     return args, model, optimizer, params, dicts
 
 
 def train_epoches(args, model, optimizer, params, dicts):
     pass
+
+def one_epoch(args, model, optimizer, params, dicts):
+    pass
+
+def test(args, model, optimizer, params, dicts):
+    pass
+
+def train(model, optimizer, Y, epoch, batch_size, data_path, gpu, dicts):
+    print("EPOCH %d" % epoch)
+    num_labels = len(dicts['label_dicts'])
+    losses = []
+    # how often to print some info to stdout
+    print_every = 25
+    model.train()
+    gen = data_generator.get_train_reader()
+    for batch_idx, features in enumerate(gen()):
+        input_sent, word_idx_list, postag_list, label_list = features
+        data = word_idx_list, postag_list
+        target = label_list
+        data, target = Variable(torch.LongTensor(data)), Variable(torch.FloatTensor(target))
+        if gpu:
+            data = data.cuda()
+            target = target.cuda()
+        optimizer.zero_grad()
+        output, loss, _ = model(data, target)
+
+        loss.backward()
+        optimizer.step()
+
+        losses.append(loss.data[0])
+            # print the average loss of the last 10 batches
+        print("Train epoch: {} [batch #{}, batch_size {}, seq length {}]\tLoss: {:.6f}".format(
+            epoch, batch_idx, data.size()[0], data.size()[1], np.mean(losses[-10:])))
+    return losses
+
 
 
 

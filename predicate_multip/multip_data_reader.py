@@ -199,6 +199,15 @@ class RcDataReader(object):
         p_eng = self._reverse_dict[dict_name][label_idx]
         return self._reverse_dict['eng_map_p_dict'][p_eng]
 
+def data_loader():
+    ttt = data_generator.get_test_reader()
+
+    for index, features in enumerate(ttt()):
+        input_sent, word_idx_list, postag_list, label_list = features
+        print(input_sent)
+        print('1st features:', len(word_idx_list), word_idx_list)
+        print('2nd features:', len(postag_list), postag_list)
+        print('3rd features:', len(label_list), '\t', label_list)
 
 if __name__ == '__main__':
     # initialize data generator
